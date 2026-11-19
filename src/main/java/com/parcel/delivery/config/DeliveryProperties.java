@@ -2,12 +2,15 @@ package com.parcel.delivery.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.time.Duration;
+
 @ConfigurationProperties(prefix = "delivery")
 public class DeliveryProperties {
 
 	private String uploadDir = "uploads";
 	private final Hub hub = new Hub();
 	private final Tesseract tesseract = new Tesseract();
+	private final Geocoding geocoding = new Geocoding();
 
 	public String getUploadDir() {
 		return uploadDir;
@@ -23,6 +26,10 @@ public class DeliveryProperties {
 
 	public Tesseract getTesseract() {
 		return tesseract;
+	}
+
+	public Geocoding getGeocoding() {
+		return geocoding;
 	}
 
 	public static class Hub {
@@ -73,6 +80,54 @@ public class DeliveryProperties {
 
 		public void setLanguage(String language) {
 			this.language = language;
+		}
+	}
+
+	public static class Geocoding {
+		private boolean enabled = true;
+		private String baseUrl = "https://nominatim.openstreetmap.org";
+		private String userAgent = "parcel-delivery/0.0.1";
+		private String email;
+		private Duration timeout = Duration.ofSeconds(10);
+
+		public boolean isEnabled() {
+			return enabled;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
+		public String getBaseUrl() {
+			return baseUrl;
+		}
+
+		public void setBaseUrl(String baseUrl) {
+			this.baseUrl = baseUrl;
+		}
+
+		public String getUserAgent() {
+			return userAgent;
+		}
+
+		public void setUserAgent(String userAgent) {
+			this.userAgent = userAgent;
+		}
+
+		public String getEmail() {
+			return email;
+		}
+
+		public void setEmail(String email) {
+			this.email = email;
+		}
+
+		public Duration getTimeout() {
+			return timeout;
+		}
+
+		public void setTimeout(Duration timeout) {
+			this.timeout = timeout;
 		}
 	}
 }
