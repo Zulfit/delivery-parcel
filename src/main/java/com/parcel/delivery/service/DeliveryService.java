@@ -164,6 +164,12 @@ public class DeliveryService {
 			stop.put("phone", parcel.phone());
 			stop.put("postcode", parcel.postcode());
 			stop.put("areaKey", parcel.areaKey());
+			stop.put("geocodeStatus", parcel.geocodeStatus());
+			if (parcel.lat() != null && parcel.lng() != null) {
+				stop.put("lat", parcel.lat());
+				stop.put("lng", parcel.lng());
+				stop.put("mapsUrl", mapsUrl(parcel.lat(), parcel.lng()));
+			}
 			suggestedRoute.add(stop);
 		}
 
@@ -196,7 +202,10 @@ public class DeliveryService {
 				parcel.getPhone(),
 				parcel.getPostcode(),
 				parcel.getAreaKey(),
-				parcel.getStopOrder()
+				parcel.getStopOrder(),
+				parcel.getLat(),
+				parcel.getLng(),
+				parcel.getGeocodeStatus()
 		);
 	}
 
@@ -206,8 +215,12 @@ public class DeliveryService {
 				batch.getHubName(),
 				batch.getHubLat(),
 				batch.getHubLng(),
-				"https://maps.google.com/?q=" + batch.getHubLat() + "," + batch.getHubLng()
+				mapsUrl(batch.getHubLat(), batch.getHubLng())
 		);
+	}
+
+	private String mapsUrl(double lat, double lng) {
+		return "https://maps.google.com/?q=" + lat + "," + lng;
 	}
 
 	private String sanitizeFilename(String name) {

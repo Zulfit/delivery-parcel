@@ -1,7 +1,12 @@
 package com.parcel.delivery.entity;
 
+import com.parcel.delivery.geo.GeoPoint;
+import com.parcel.delivery.geo.GeocodeResult;
+import com.parcel.delivery.geo.GeocodeStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -43,6 +48,13 @@ public class Parcel {
 	private String areaKey;
 
 	private Integer stopOrder;
+
+	private Double lat;
+
+	private Double lng;
+
+	@Enumerated(EnumType.STRING)
+	private GeocodeStatus geocodeStatus;
 
 	public Long getId() {
 		return id;
@@ -126,5 +138,30 @@ public class Parcel {
 
 	public void setStopOrder(Integer stopOrder) {
 		this.stopOrder = stopOrder;
+	}
+
+	public Double getLat() {
+		return lat;
+	}
+
+	public Double getLng() {
+		return lng;
+	}
+
+	public GeocodeStatus getGeocodeStatus() {
+		return geocodeStatus;
+	}
+
+	/**
+	 * Null unless the parcel geocoded successfully.
+	 */
+	public GeoPoint geoPoint() {
+		return geocodeStatus == GeocodeStatus.OK ? new GeoPoint(lat, lng) : null;
+	}
+
+	public void applyGeocode(GeocodeResult result) {
+		this.geocodeStatus = result.status();
+		this.lat = result.point() == null ? null : result.point().lat();
+		this.lng = result.point() == null ? null : result.point().lng();
 	}
 }

@@ -1,5 +1,7 @@
 package com.parcel.delivery.dto;
 
+import com.parcel.delivery.geo.GeocodeStatus;
+
 public record ParcelResponse(
 		Long id,
 		String originalFilename,
@@ -9,6 +11,9 @@ public record ParcelResponse(
 		String phone,
 		String postcode,
 		String areaKey,
-		Integer stopOrder
+		Integer stopOrder,
+		Double lat,
+		Double lng,
+		GeocodeStatus geocodeStatus
 ) {
 }
