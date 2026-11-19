@@ -9,6 +9,7 @@ import com.parcel.delivery.dto.ParcelResponse;
 import com.parcel.delivery.entity.DeliveryBatch;
 import com.parcel.delivery.entity.Parcel;
 import com.parcel.delivery.exception.ResourceNotFoundException;
+import com.parcel.delivery.geo.GeocodingService;
 import com.parcel.delivery.repository.DeliveryBatchRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +33,8 @@ public class DeliveryService {
 	private final DeliveryProperties properties;
 	private final OcrService ocrService;
 	private final LabelParser labelParser;
-	private final RouteSorter routeSorter;
+	private final GeocodingService geocodingService;
+	private final RoutePlanner routePlanner;
 	private final Path uploadRoot;
 
 	public DeliveryService(
@@ -40,12 +42,14 @@ public class DeliveryService {
 			DeliveryProperties properties,
 			OcrService ocrService,
 			LabelParser labelParser,
-			RouteSorter routeSorter) throws IOException {
+			GeocodingService geocodingService,
+			RoutePlanner routePlanner) throws IOException {
 		this.batchRepository = batchRepository;
 		this.properties = properties;
 		this.ocrService = ocrService;
 		this.labelParser = labelParser;
-		this.routeSorter = routeSorter;
+		this.geocodingService = geocodingService;
+		this.routePlanner = routePlanner;
 		this.uploadRoot = Path.of(properties.getUploadDir()).toAbsolutePath().normalize();
 		Files.createDirectories(uploadRoot);
 	}
@@ -131,9 +135,10 @@ public class DeliveryService {
 			parcel.setPhone(parsed.phone());
 			parcel.setPostcode(parsed.postcode());
 			parcel.setAreaKey(parsed.areaKey());
+			parcel.applyGeocode(geocodingService.geocode(parsed.address(), parsed.postcode()));
 		}
 
-		routeSorter.assignStopOrder(batch.getParcels());
+		routePlanner.assignStopOrder(batch.getParcels(), batch.getHubLat(), batch.getHubLng());
 		batch.setStatus("PLANNED");
 		return toResponse(batchRepository.save(batch));
 	}
