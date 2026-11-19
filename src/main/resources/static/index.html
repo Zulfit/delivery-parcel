@@ -406,8 +406,19 @@
           if (stop.address) lines.push(stop.address);
           if (stop.postcode || stop.areaKey) lines.push("Area: " + (stop.postcode || stop.areaKey));
           if (stop.phone) lines.push("Phone: " + stop.phone);
+          if (stop.address && stop.geocodeStatus === "FAILED") lines.push("Map location not found. Ordered by area.");
           details.textContent = lines.join(" · ")
             || "Address unclear from this photo — retake closer to the label (fill the screen, less glare).";
+          if (stop.lat != null && stop.lng != null) {
+            const link = document.createElement("a");
+            link.className = "maps";
+            link.href = stop.mapsUrl || ("https://maps.google.com/?q=" + stop.lat + "," + stop.lng);
+            link.target = "_blank";
+            link.rel = "noopener";
+            link.textContent = "Open in Google Maps";
+            details.appendChild(document.createElement("br"));
+            details.appendChild(link);
+          }
         }
 
         body.appendChild(title);
@@ -433,7 +444,7 @@
         batchIdEl.textContent = String(batchId);
         setStatus(batchStatusMsg, "Uploading " + files.length + " photo(s)…");
         await uploadParcels(batchId, files);
-        setStatus(batchStatusMsg, "Running OCR and sorting… (can take a bit)");
+        setStatus(batchStatusMsg, "Reading labels, locating addresses on the map, and ordering stops… (about 1 second per parcel)");
         const planned = await planBatch(batchId);
         batchStatusEl.textContent = planned.status || "PLANNED";
         setStatus(batchStatusMsg, "Route ready.", "ok");

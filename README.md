@@ -1,6 +1,6 @@
 # Parcel Delivery (OCR route planner)
 
-Free MVP: mobile web UI to take/upload parcel label photos → Tesseract OCR → group by area → delivery order ending at hub.
+Free MVP: mobile web UI to take/upload parcel label photos → Tesseract OCR → geocode addresses → nearest-stop delivery order ending at hub.
 
 Study CRUD project is separate (`../Spring-Boot`). This app lives only in `Parcel-Delivery`.
 
@@ -75,6 +75,7 @@ curl -s -X POST http://localhost:8081/api/batches/1/plan
 
 - Mobile UI is a web page served by Spring Boot (Flutter not required for tomorrow’s test).
 - OCR is best-effort; wrinkled labels may need a quick visual check.
+- Geocoding: **Plan route** looks up each address on OpenStreetMap [Nominatim](https://nominatim.org/release-docs/latest/api/Search/), so the laptop needs internet while planning. Nominatim allows 1 request/second, so planning takes about 1 second per parcel. Stops with coordinates are ordered nearest-first from the hub and get a Google Maps link; stops that cannot be located follow, grouped by postcode. Settings live under `delivery.geocoding.*` in `application.properties` (`enabled=false` turns it off and falls back to postcode grouping).
 - Uploaded images are stored under `uploads/`.
 - H2 data resets when the app stops.
 - H2 console: http://localhost:8081/h2-console (JDBC URL `jdbc:h2:mem:parceldb`, user `sa`, empty password).
